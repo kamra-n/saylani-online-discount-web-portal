@@ -170,12 +170,28 @@ const initialState = {
 };
 
 export const OnlineStoreSlice = createSlice({
-    name: "twitter",
+    name: "onlineStore",
     initialState,
     reducers: {
         cart: (state, action) => {
             state.dataList.cart.push(action.payload);
 
+        },
+
+        increaseQuantity:(state,action)=>{    
+             let increaseQuantity = state.dataList.cart.map((current) => {
+                 if (current.id === action.payload.id) {
+                     return { ...current, quantity: current.quantity + 1 };
+                    } 
+                    else {
+                        return current;
+                    }
+                    console.log('current',action.payload)
+              });
+              state.dataList.cart = increaseQuantity
+
+            //   console.log('increaseCartValue',increaseCartValue)
+            //   return setTotal(increaseCartValue);
         }
     },
     extraReducers: (builder) => {
@@ -262,6 +278,6 @@ export const OnlineStoreSlice = createSlice({
 
 
 export { registerUser, loginUser, addCategory, getAllCategories, addProduct, getAllProducts };
-export const {cart} = OnlineStoreSlice.actions
+export const {cart,increaseQuantity} = OnlineStoreSlice.actions
 
 export default OnlineStoreSlice.reducer;

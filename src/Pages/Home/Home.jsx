@@ -1,16 +1,18 @@
 import Navbar from "../../Components/Navbar";
 import HeroSection from "../HeroSection/HeroSection";
 import { searchIcon } from "../../assets";
-import { Pagination } from "antd";
 import { Cards } from "../../Components/Cards";
 import { getAllCategories, getAllProducts } from "../../store/OnlineStoreSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
+import { Skeleton } from "antd";
+
 export default function Home() {
   const dispatch = useDispatch();
   const state = useSelector((state) => state);
 
   console.log("state", state?.OnlineStoreSlice?.dataList.allCategories);
+  console.log("state", state?.OnlineStoreSlice?.isLoading);
 
   const fetchAllProducts = () => {
     dispatch(getAllProducts())
@@ -40,22 +42,26 @@ export default function Home() {
 
       <h1 className="font-bold text-lg lg:text-2xl">Shop by Category</h1>
 
-      <div className="my-8 flex overflow-x-scroll md:overflow-x-hidden  items-center gap-10 ">
-        {state?.OnlineStoreSlice?.dataList.allCategories?.map((cat, index) => {
-          return (
-            <div
-              className=" p-2 border border-[#61B846]    flex flex-col justify-center items-center cursor-pointer"
-              key={index}
-            >
-              <img
-                src={cat.imageUrl}
-                alt="category Image"
-                className="h-[100px] w-[100px] rounded-xl"
-              />
-              <p>{cat.categoryName}</p>
-            </div>
-          );
-        })}
+      <div className="my-8 flex mx-auto overflow-x-scroll md:overflow-x-hidden  items-center gap-10 ">
+        {state?.OnlineStoreSlice?.isLoading ? (
+          <Skeleton active />
+        ) : (
+          state?.OnlineStoreSlice?.dataList.allCategories?.map((cat, index) => {
+            return (
+              <div
+                className=" p-2 border border-[#61B846] flex flex-col justify-center items-center cursor-pointer"
+                key={index}
+              >
+                <img
+                  src={cat.imageUrl}
+                  alt="category Image"
+                  className="h-[100px] w-[100px] rounded-xl"
+                />
+                <p>{cat.categoryName}</p>
+              </div>
+            );
+          })
+        )}
       </div>
 
       <div className="my-3 flex justify-center items-center w-[90%]  border-2 rounded-lg">
@@ -71,9 +77,13 @@ export default function Home() {
         <h1 className="font-bold text-2xl">Products</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-7 mt-6">
-          {state?.OnlineStoreSlice?.dataList.allProducts.map((pro, index) => {
-            return <Cards {...pro} key={index} />;
-          })}
+          {state?.OnlineStoreSlice?.isLoading ? (
+            <Skeleton active />
+          ) : (
+            state?.OnlineStoreSlice?.dataList.allProducts.map((pro, index) => {
+              return <Cards {...pro} key={index} />;
+            })
+          )}
         </div>
       </div>
     </div>
