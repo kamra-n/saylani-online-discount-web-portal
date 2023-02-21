@@ -10,9 +10,9 @@ export const Protected = ({ Cmp }) => {
      return  navigate("/login");
     }
 
-    // else if (data?.isAdmin === true) {
-    //  navigate("/admin");
-    // }
+    else if (data?.role === 'Admin') {
+    return navigate("/admin");
+    }
 
     // else if(data && data?.role === "User"){
     //  navigate('/')
@@ -21,7 +21,7 @@ export const Protected = ({ Cmp }) => {
     // else{
     //     navigate('/')
     // }
-  });
+  },[]);
 
   return (
     <div>

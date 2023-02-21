@@ -13,12 +13,11 @@ import Button from "../../Components/Button/Button";
 
 export default function Login() {
   const navigate = useNavigate();
-  
 
   const [open, setOpen] = useState(false);
 
   let userInfo = JSON.parse(localStorage.getItem("login"));
-  console.log('userInfo',userInfo?.isAdmin)
+  console.log("userInfo", userInfo?.isAdmin);
 
   const showModal = () => {
     setOpen(true);
@@ -85,8 +84,8 @@ export default function Login() {
       dispatch(loginUser(userLogin)).then((data) => {
         setTimeout(() => {
           if (data.type === "Online/loginUser/fulfilled") {
-            userInfo?.role === 'Admin' ? navigate('/admin') : navigate('/')
-             window.location.reload();
+            userInfo?.role === "Admin" ? navigate("/admin") : navigate("/");
+            window.location.reload();
             console.log("im running");
           }
         }, 4000);

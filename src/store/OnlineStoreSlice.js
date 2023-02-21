@@ -54,7 +54,6 @@ const loginUser = createAsyncThunk('Online/loginUser', ((userLogin) => {
             toast.success('User Login Successfully!');
 
             const user = userCredential.user;
-            console.log(user.uid)
             getDoc(doc(db, "users", user.uid)).then(docSnap => {
                 if (docSnap.exists()) {
                     return localStorage.setItem('login', JSON.stringify(docSnap.data()))
@@ -77,7 +76,6 @@ const loginUser = createAsyncThunk('Online/loginUser', ((userLogin) => {
 }))
 
 const addCategory = createAsyncThunk("OnlineStore/addCategory", async (data) => {
-    console.log('add', data);
     try {
         await setDoc(doc(db, "Categories", data?.id.toString()), data);
         return toast.success('Data Added Successfully!');
@@ -95,7 +93,6 @@ const getAllCategories = createAsyncThunk("OnlineStore/getAllCategories", async 
         querySnapshot.forEach((doc) => {
             allData.push(doc.data());
         });
-        console.log('allData', allData);
         return allData
     } catch (e) {
         console.error("Error adding document: ", e);
@@ -104,7 +101,6 @@ const getAllCategories = createAsyncThunk("OnlineStore/getAllCategories", async 
 
 
 const addProduct = createAsyncThunk("OnlineStore/addProduct", async (data) => {
-    console.log('addProducts', data);
     try {
         await setDoc(doc(db, "Products", data?.id.toString()), data);
         return toast.success('Data Added Successfully!');
@@ -123,7 +119,6 @@ const getAllProducts = createAsyncThunk("OnlineStore/getAllProducts", async () =
         querySnapshot.forEach((doc) => {
             allData.push(doc.data());
         });
-        console.log('allData', allData);
         return allData
     } catch (e) {
         console.error("Error adding document: ", e);
@@ -131,17 +126,30 @@ const getAllProducts = createAsyncThunk("OnlineStore/getAllProducts", async () =
 });
 
 
-const getSingleUserTweets = createAsyncThunk("twitter/getSingleUserTweets", async () => {
+const createOrder = createAsyncThunk("OnlineStore/createOrder", async (data) => {
+    try {
+        await setDoc(doc(db, "orders", data?.orderId.toString()), data);
+        toast.success('Order Created Successfully!');
+
+
+
+    } catch (e) {
+        toast.error("Error adding document: ", `${e}`);
+    }
+});
+
+
+
+const getCurrentUserOrders = createAsyncThunk("twitter/getCurrentUserOrders", async () => {
     const data = localStorage.getItem('login')
 
     const currentUid = JSON.parse(data);
     try {
-        const q = query(collection(db, "posts"), where("uid", "==", currentUid?.uid));
+        const q = query(collection(db, "orders"), where("uid", "==", currentUid?.uid));
         const querySnapshot = await getDocs(q);
         const Data = [];
 
         querySnapshot.forEach((doc) => {
-            // doc.data() is never undefined for query doc snapshots
             Data.push(doc.data());
 
             console.log('doc.id', " => ", doc.data());
@@ -160,11 +168,14 @@ const getSingleUserTweets = createAsyncThunk("twitter/getSingleUserTweets", asyn
 
 
 
+
+
 const initialState = {
     isLoading: false,
     dataList: {
         allCategories: [],
         allProducts: [],
+        currentUserOrders: [],
         cart: []
     },
 };
@@ -178,21 +189,47 @@ export const OnlineStoreSlice = createSlice({
 
         },
 
-        increaseQuantity:(state,action)=>{    
-             let increaseQuantity = state.dataList.cart.map((current) => {
-                 if (current.id === action.payload.id) {
-                     return { ...current, quantity: current.quantity + 1 };
-                    } 
-                    else {
-                        return current;
-                    }
-                    console.log('current',action.payload)
-              });
-              state.dataList.cart = increaseQuantity
+        increaseQuantity: (state, action) => {
+            let increaseQuantity = state.dataList.cart.map((current) => {
+                if (current.id === action.payload) {
+                    return { ...current, quantity: current.quantity + 1 };
+                }
+                else {
+                    return current;
+                }
+            });
 
-            //   console.log('increaseCartValue',increaseCartValue)
-            //   return setTotal(increaseCartValue);
+            state.dataList.cart = increaseQuantity
         }
+        ,
+
+        decreaseQuantity: (state, action) => {
+            // console.log(action)
+            if (action.payload.quantity === 1) {
+                let remove = state.dataList.cart.filter((removeItem) => {
+                    if (removeItem.id === action.payload.id) {
+                        return removeItem.id !== action.payload.id;
+                    }
+                    return removeItem;
+                });
+                state.dataList.cart = remove
+            } else {
+                let decreaseCartValue = state.dataList.cart.map((current) => {
+                    if (current.id === action.payload.id) {
+                        return { ...current, quantity: current.quantity - 1 };
+                    }
+                    return current;
+                });
+                state.dataList.cart = decreaseCartValue
+
+            }
+        },
+
+        removeAllItems: (state, action) => {
+
+        }
+
+
     },
     extraReducers: (builder) => {
         builder.addCase(registerUser.pending, (state, action) => {
@@ -255,7 +292,6 @@ export const OnlineStoreSlice = createSlice({
             state.isLoading = false;
         })
 
-
         builder.addCase(getAllProducts.pending, (state, action) => {
             state.isLoading = true;
         });
@@ -268,16 +304,40 @@ export const OnlineStoreSlice = createSlice({
             state.isLoading = false;
         });
 
+        builder.addCase(createOrder.pending, (state, action) => {
+            state.isLoading = true;
+        });
+        builder.addCase(createOrder.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.dataList.cart = []
 
 
+        });
+        builder.addCase(createOrder.rejected, (state, action) => {
+            state.isLoading = false;
+        })
 
+
+        builder.addCase(getCurrentUserOrders.pending, (state, action) => {
+            state.isLoading = true;
+        });
+        builder.addCase(getCurrentUserOrders.fulfilled, (state, action) => {
+            state.isLoading = false;
+            // state.dataList.cart = []
+            state.dataList.currentUserOrders = action.payload
+
+
+        });
+        builder.addCase(getCurrentUserOrders.rejected, (state, action) => {
+            state.isLoading = false;
+        })
 
 
     },
 });
 
 
-export { registerUser, loginUser, addCategory, getAllCategories, addProduct, getAllProducts };
-export const {cart,increaseQuantity} = OnlineStoreSlice.actions
+export { registerUser, loginUser, addCategory, getAllCategories, addProduct, getAllProducts, createOrder, getCurrentUserOrders };
+export const { cart, increaseQuantity, decreaseQuantity } = OnlineStoreSlice.actions
 
 export default OnlineStoreSlice.reducer;

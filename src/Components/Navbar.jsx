@@ -1,5 +1,6 @@
 import { SaylaniLogo } from "../assets";
 import { NavLink } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import {
   AiOutlineAlignLeft,
@@ -10,6 +11,8 @@ import { useState } from "react";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const state = useSelector((state) => state);
+
   return (
     <nav className="flex w-full justify-around h-20  items-center shadow-lg lg:justify-start  relative ">
       <div className="pl-0 lg:pl-[3rem]">
@@ -25,13 +28,11 @@ export default function Navbar() {
 
         <li className="hover:text-[#0d6db7] ease-in-out">
           <li className="hover:text-[#0d6db7] text-2xl ease-in-out">
-            <NavLink to="/cart">
-              <AiOutlineShoppingCart />
+            <NavLink to="/cart" className='flex  items-center'>
+              <AiOutlineShoppingCart  />  <p className="pl-1 text-[#61B846] text-xl mb-3">{state?.OnlineStoreSlice?.dataList.cart.length}</p>
+
             </NavLink>
           </li>
-          {/* <button className="py-2 px-4 bg-[#0d6db7] text-white rounded-lg flex justify-center items-center">
-            Donate Now
-          </button> */}
         </li>
       </ul>
       <button
@@ -61,9 +62,7 @@ export default function Navbar() {
               <AiOutlineShoppingCart />
             </NavLink>
           </li>
-          {/* <button className="py-2 px-4 bg-[#0d6db7] text-white rounded-lg flex justify-center items-center">
-            Donate Now
-          </button> */}
+       
         </li>
       </ul>
     </nav>

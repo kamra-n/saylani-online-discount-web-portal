@@ -5,6 +5,7 @@ import sliderTwo from '../assets/sliderTwo.jpg'
 import sliderThree from '../assets/sliderThree.jpg'
 import searchIcon from '../assets/SearchIcon.svg'
 import proDuctImage from '../assets/ProductImage.svg'
+import tickIcon from '../assets/tick.svg'
 
 
 
@@ -16,5 +17,6 @@ export {
     sliderTwo,
     sliderThree,
     searchIcon,
-    proDuctImage
+    proDuctImage,
+    tickIcon
 }

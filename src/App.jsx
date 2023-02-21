@@ -11,6 +11,7 @@ import { ViewProducts } from "./Pages/Admin/Products/ViewProducts";
 import { OrderStatus } from "./Pages/Admin/OrderStatus/OrderStatus";
 import { AdminProfile } from "./Pages/Admin/AdminProfile/AdminProfile";
 import { Cart } from "./Pages/Cart/Cart";
+import Accounts from "./Pages/Accounts/Accounts";
 export default function App() {
   let userInfo = JSON.parse(localStorage.getItem("login"));
 
@@ -18,6 +19,7 @@ export default function App() {
     <>
       <Routes>
         <Route path="/" element={<Protected Cmp={Home} />} />
+        <Route path="/accounts" element={<Accounts/>} />
         <Route path="login" element={<Login />} />
         <Route path="/cart" element={<Cart />} />
         {userInfo?.role === "Admin" ? (

@@ -2,15 +2,27 @@ import { useSelector, useDispatch } from "react-redux";
 import { AiTwotoneDelete } from "react-icons/ai";
 import Navbar from "../../Components/Navbar";
 import Button from "../../Components/Button/Button";
-import { useState, useEffect } from "react";
-import { increaseQuantity } from "../../store/OnlineStoreSlice";
+import { useState, useEffect, useRef } from "react";
+import { createOrder } from "../../store/OnlineStoreSlice";
+import { serverTimestamp } from "firebase/firestore";
+import { ToastContainer } from "react-toastify";
+
+import {
+  increaseQuantity,
+  decreaseQuantity,
+} from "../../store/OnlineStoreSlice";
 
 export const Cart = () => {
   let data = JSON.parse(localStorage.getItem("login"));
   const [total, setTotal] = useState("");
   const dispatch = useDispatch();
   const state = useSelector((state) => state);
-  console.log("state", state?.OnlineStoreSlice?.dataList.cart);
+
+  const nameRef = useRef("");
+  const emailRef = useRef("");
+  const phoneRef = useRef("");
+  const addressRef = useRef("");
+
   useEffect(() => {
     setTotal(
       state?.OnlineStoreSlice?.dataList.cart.reduce(
@@ -20,39 +32,35 @@ export const Cart = () => {
     );
   }, [state?.OnlineStoreSlice?.dataList.cart]);
 
-  // increase work
-  // const increaseQuantity = (id) => {
-  //   let increaseCartValue = state?.OnlineStoreSlice?.dataList.cart.map((current) => {
-  //     if (current.id === id) {
-  //       return { ...current, quantity: current.quantity + 1 };
-  //     } else {
-  //       return current;
-  //     }
-  //   });
-  //   return setTotal(increaseCartValue);
-  // };
+  const createNewOrder = () => {
+    if (
+      nameRef.current.value === "" ||
+      emailRef.current.value === "" ||
+      phoneRef.current.value === "" ||
+      addressRef.current.value === ""
+    ) {
+      return alert("please fill data correctly");
+    } else {
+      const orderID = new Date().getTime();
+      const order = {
+        orderId: orderID,
+        name: nameRef.current.value,
+        email: emailRef.current.value,
+        phone: phoneRef.current.value,
+        address: addressRef.current.value,
+        userId: data?.uid,
+        createdOn: serverTimestamp(),
+        total,
+        item: state?.OnlineStoreSlice?.dataList.cart,
+      };
 
-  // decrease work
-
-  // const decreaseQuantity = (item) => {
-  //   if (item.quantity === 1) {
-  //     let remove = cart.filter((removeItem) => {
-  //       if (removeItem.id === item.id) {
-  //         return removeItem.id !== item.id;
-  //       }
-  //       return removeItem;
-  //     });
-  //     setCart(remove);
-  //   } else {
-  //     let decreaseCartValue = cart.map((current) => {
-  //       if (current.id === item.id) {
-  //         return { ...current, quantity: current.quantity - 1 };
-  //       }
-  //       return current;
-  //     });
-  //     return setCart(decreaseCartValue);
-  //   }
-  // };
+      dispatch(createOrder(order));
+      nameRef.current.value = "";
+      emailRef.current.value = "";
+      phoneRef.current.value = "";
+      addressRef.current.value = "";
+    }
+  };
 
   return (
     <div className="h-full px-4 md:px-10 lg:px-20 max-w-[1512px] mx-auto">
@@ -95,7 +103,14 @@ export const Cart = () => {
                 <p className="flex gap-3 font-bold text-lg md:text-2xl">
                   <span
                     className="font-bold cursor-pointer"
-                    // onClick={() => decreaseQuantity}
+                    onClick={() =>
+                      dispatch(
+                        decreaseQuantity({
+                          id: item.id,
+                          quantity: item.quantity,
+                        })
+                      )
+                    }
                   >
                     -
                   </span>
@@ -130,25 +145,33 @@ export const Cart = () => {
           type="text"
           placeholder="Enter Your Name"
           className="border-0 border-b-2 border-grey-dark"
+          ref={nameRef}
         />
         <input
           type="email"
           placeholder="Enter Your Email"
           className="border-0 border-b-2 border-grey-dark"
+          ref={emailRef}
         />
         <input
           type="number"
           placeholder="Enter Your Number"
           className="border-0 border-b-2 border-grey-dark"
+          ref={phoneRef}
         />
         <textarea
           placeholder="Enter Shipping Address"
           className="border-0 border-b-2 border-grey-dark"
+          ref={addressRef}
         />
-        <Button className="flex justify-center   items-center !p-0 bg-[#61B846] text-lg text-white">
+        <Button
+          className="flex justify-center   items-center !p-0 bg-[#61B846] text-lg text-white"
+          onClick={() => createNewOrder()}
+        >
           Place Order
         </Button>
       </div>
+      <ToastContainer />
     </div>
   );
 };
